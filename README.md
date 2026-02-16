@@ -2,7 +2,7 @@
 
 A Nemotron-based agent that continuously learns to manage power grid congestion, voltage violations, and renewable curtailment — trained online on NVIDIA A100 GPUs while it operates.
 
-https://github.com/user-attachments/assets/demo-vid.mp4
+Demo Video: https://youtu.be/nbLHjGUXToU
 
 > *If viewing locally, open `demo-vid.mp4` in the project root.*
 
