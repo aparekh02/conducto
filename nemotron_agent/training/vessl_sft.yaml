@@ -1,0 +1,52 @@
+# Conducto SFT fine-tuning run — launched via VESSL API
+# This template is filled in by VESSLRunner at runtime.
+#
+# Manual usage:
+#   vessl run create -f vessl_sft.yaml
+
+name: "conducto-sft-{run_tag}"
+description: "SFT fine-tune Nemotron on {sft_samples} grid-operator traces"
+tags:
+  - conducto
+  - sft
+  - fine-tune
+
+resources:
+  cluster: "{cluster}"
+  preset: "{gpu_preset}"
+
+image: nvcr.io/nvidia/nemo:24.12
+
+import:
+  /code/:
+    git:
+      url: https://github.com/akshparekh/conducto
+      ref: main
+  /data/:
+    local: "{local_data_dir}"
+
+env:
+  MODEL_ID: "{model_id}"
+  DATA_PATH: /data/{sft_filename}
+  OUTPUT_DIR: /output/sft-adapters
+  EPOCHS: "{epochs}"
+  LEARNING_RATE: "{learning_rate}"
+  LORA_RANK: "{lora_rank}"
+  BATCH_SIZE: "{batch_size}"
+
+run:
+  - workdir: /code
+    command: |-
+      pip install -q peft trl bitsandbytes
+      python nemotron_agent/training/scripts/sft_train.py \
+        --model_id $MODEL_ID \
+        --data_path $DATA_PATH \
+        --output_dir $OUTPUT_DIR \
+        --epochs $EPOCHS \
+        --learning_rate $LEARNING_RATE \
+        --lora_rank $LORA_RANK \
+        --batch_size $BATCH_SIZE
+
+export:
+  /output/:
+    vessl-artifact: "conducto-sft-{run_tag}"

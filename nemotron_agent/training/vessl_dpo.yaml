@@ -1,0 +1,54 @@
+# Conducto DPO fine-tuning run — launched via VESSL API
+# This template is filled in by VESSLRunner at runtime.
+#
+# Manual usage:
+#   vessl run create -f vessl_dpo.yaml
+
+name: "conducto-dpo-{run_tag}"
+description: "DPO preference training on {dpo_pairs} grid decision pairs"
+tags:
+  - conducto
+  - dpo
+  - fine-tune
+
+resources:
+  cluster: "{cluster}"
+  preset: "{gpu_preset}"
+
+image: nvcr.io/nvidia/nemo:24.12
+
+import:
+  /code/:
+    git:
+      url: https://github.com/akshparekh/conducto
+      ref: main
+  /data/:
+    local: "{local_data_dir}"
+
+env:
+  MODEL_ID: "{model_id}"
+  DATA_PATH: /data/{dpo_filename}
+  OUTPUT_DIR: /output/dpo-adapters
+  METHOD: dpo
+  EPOCHS: "{epochs}"
+  LEARNING_RATE: "{learning_rate}"
+  LORA_RANK: "{lora_rank}"
+  BATCH_SIZE: "{batch_size}"
+
+run:
+  - workdir: /code
+    command: |-
+      pip install -q peft trl bitsandbytes
+      python nemotron_agent/training/scripts/rl_train.py \
+        --model_id $MODEL_ID \
+        --data_path $DATA_PATH \
+        --output_dir $OUTPUT_DIR \
+        --method $METHOD \
+        --epochs $EPOCHS \
+        --learning_rate $LEARNING_RATE \
+        --lora_rank $LORA_RANK \
+        --batch_size $BATCH_SIZE
+
+export:
+  /output/:
+    vessl-artifact: "conducto-dpo-{run_tag}"

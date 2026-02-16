@@ -1,0 +1,9 @@
+# Local agent (runs on your Mac)
+requests>=2.31
+python-dotenv>=1.0
+numpy>=1.24
+gymnasium>=0.29
+
+# ON-GPU training dependencies (installed on the VESSL A100, not locally)
+# These are pre-installed in the nvcr.io/nvidia/nemo:24.12 container image:
+#   torch, transformers, datasets, peft, trl, bitsandbytes
