@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conducto</title>
+<style>
+:root {
+  --bg: #111111;
+  --bg2: #1a1a1a;
+  --bg3: #222222;
+  --border: #2a2a2a;
+  --green: #00ff41;
+  --green-dim: #00cc33;
+  --green-bg: rgba(0,255,65,0.08);
+  --green-bg2: rgba(0,255,65,0.15);
+  --text: #d0d0d0;
+  --text-dim: #666666;
+  --red: #ff3333;
+  --yellow: #ffcc00;
+  --cyan: #00ddff;
+  --orange: #ff8800;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'SF Mono','Fira Code','Cascadia Code','Consolas', monospace;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Layout: header + 2 columns ─── */
+.app {
+  display: grid;
+  grid-template-rows: 44px 1fr;
+  grid-template-columns: 1fr 380px;
+  height: 100vh;
+}
+
+/* ── Header ─── */
+.header {
+  grid-column: 1 / -1;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+}
+
+.logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: 3px;
+}
+
+.tagline {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.header-pills {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pill {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid rgba(0,255,65,0.2);
+}
+
+.pill-dim {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.ws-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  transition: background 0.3s;
+}
+.ws-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+/* ── Grid Panel (left) ─── */
+.grid-panel {
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.grid-panel svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* SVG styles */
+.bus-circle {
+  stroke-width: 2;
+  cursor: pointer;
+  transition: stroke 0.3s, filter 0.3s;
+}
+.bus-label {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+  font-family: inherit;
+}
+.bus-sub {
+  fill: var(--text-dim);
+  font-size: 9px;
+  text-anchor: middle;
+  pointer-events: none;
+  font-family: inherit;
+}
+.power-line {
+  stroke-linecap: round;
+  transition: stroke 0.5s, stroke-width 0.3s, opacity 0.3s;
+}
+.line-label {
+  fill: var(--text-dim);
+  font-size: 8px;
+  text-anchor: middle;
+  font-family: inherit;
+}
+.flow-dash {
+  stroke-dasharray: 6 4;
+  fill: none;
+  animation: dashFlow 1s linear infinite;
+}
+@keyframes dashFlow { to { stroke-dashoffset: -10; } }
+
+/* New node / link appearance animation */
+@keyframes nodeAppear {
+  0% { r: 0; opacity: 0; }
+  50% { r: 30; opacity: 1; }
+  100% { r: 22; opacity: 1; }
+}
+@keyframes linkAppear {
+  0% { stroke-dashoffset: 200; opacity: 0; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+.node-new circle.bus-circle { animation: nodeAppear 0.6s ease-out forwards; }
+.link-new {
+  stroke-dasharray: 200;
+  animation: linkAppear 0.8s ease-out forwards;
+}
+
+/* Pulse ring on action target */
+@keyframes pulseRing {
+  0% { r: 24; opacity: 0.9; }
+  100% { r: 38; opacity: 0; }
+}
+.action-ring {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0;
+}
+.action-ring.active {
+  animation: pulseRing 1.2s ease-out infinite;
+}
+
+/* Tripped line blink */
+@keyframes tripBlink {
+  0%,100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+.line-tripped {
+  stroke-dasharray: 4 6;
+  animation: tripBlink 1s infinite;
+}
+
+/* ── Chat Panel (right) ─── */
+.chat-panel {
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Chat message styles */
+.chat-msg {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.chat-msg .msg-header {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+}
+
+/* System events — dark with green accent */
+.chat-msg.system {
+  background: var(--green-bg);
+  border-left: 3px solid var(--green);
+  color: var(--green-dim);
+}
+.chat-msg.system .msg-header { color: var(--green); }
+
+/* Agent thinking — darker */
+.chat-msg.thinking {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--text-dim);
+  color: var(--text-dim);
+  font-style: italic;
+}
+.chat-msg.thinking .msg-header { color: #888; }
+
+/* Agent actions — highlighted */
+.chat-msg.action {
+  background: rgba(0,221,255,0.06);
+  border-left: 3px solid var(--cyan);
+  color: var(--text);
+}
+.chat-msg.action .msg-header { color: var(--cyan); }
+
+.action-line {
+  display: flex;
+  gap: 6px;
+  padding: 2px 0;
+  align-items: flex-start;
+}
+.action-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.badge-REDISPATCH { background: rgba(255,136,0,0.2); color: var(--orange); }
+.badge-STORAGE { background: rgba(0,255,65,0.15); color: var(--green); }
+.badge-TOPOLOGY { background: rgba(139,92,246,0.2); color: #8b5cf6; }
+.badge-LOAD_SHAPE { background: rgba(0,221,255,0.15); color: var(--cyan); }
+
+.action-text { color: var(--text-dim); font-size: 10px; }
+
+/* Risk badges in thinking */
+.risk-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+.risk-low { background: rgba(0,255,65,0.15); color: var(--green); }
+.risk-medium { background: rgba(255,204,0,0.15); color: var(--yellow); }
+.risk-high { background: rgba(255,51,51,0.15); color: var(--red); }
+.risk-critical { background: rgba(255,0,0,0.25); color: #ff4444; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">CONDUCTO</div>
+    <span class="tagline">Grid Pressure Autopilot</span>
+    <div class="header-pills">
+      <span class="pill" id="pill-cycle">Cycle 0</span>
+      <span class="pill pill-dim" id="pill-ep">Ep 1</span>
+    </div>
+    <div class="ws-dot" id="ws-dot"></div>
+  </div>
+
+  <!-- Grid SVG -->
+  <div class="grid-panel">
+    <svg id="grid-svg" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="glow-g"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-r"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glow-y"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <g id="g-lines"></g>
+      <g id="g-buses"></g>
+      <g id="g-rings"></g>
+    </svg>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-panel">
+    <div class="chat-header">Live Feed</div>
+    <div class="chat-body" id="chat-body">
+      <div class="chat-msg system">
+        <div class="msg-header">System</div>
+        Waiting for simulation data...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  State
+// ══════════════════════════════════════════════
+const BASE_POSITIONS = {
+  "B0-SOLAR":  { x: 140, y: 130 },
+  "B1-CITY":   { x: 400, y: 90  },
+  "B2-GAS":    { x: 660, y: 130 },
+  "B3-WIND":   { x: 140, y: 420 },
+  "B4-SUBURB": { x: 400, y: 460 },
+  "B5-COAL":   { x: 660, y: 420 },
+};
+
+// Dynamic state: buses and lines known to the frontend
+let knownBuses = {};   // busId → {x, y, isNew}
+let knownLines = {};   // lineId → {fromId, toId, isNew}
+let ws = null;
+let lastChatLen = 0;
+let currentViewBox = { x: 0, y: 0, w: 800, h: 560 };
+
+// ══════════════════════════════════════════════
+//  SVG helpers
+// ══════════════════════════════════════════════
+const SVG_NS = "http://www.w3.org/2000/svg";
+function svgEl(tag) { return document.createElementNS(SVG_NS, tag); }
+
+function getPos(busId) {
+  if (knownBuses[busId]) return knownBuses[busId];
+  if (BASE_POSITIONS[busId]) return BASE_POSITIONS[busId];
+  return { x: 400, y: 280 };
+}
+
+// Compute center of all known + base buses
+function getNetworkCenter() {
+  const allPos = Object.values(knownBuses);
+  if (allPos.length === 0) {
+    const base = Object.values(BASE_POSITIONS);
+    return { x: base.reduce((s,p) => s+p.x, 0)/base.length, y: base.reduce((s,p) => s+p.y, 0)/base.length };
+  }
+  return { x: allPos.reduce((s,p) => s+p.x, 0)/allPos.length, y: allPos.reduce((s,p) => s+p.y, 0)/allPos.length };
+}
+
+// Compute bounding box of all known nodes
+function getNetworkBBox() {
+  const allPos = Object.values(knownBuses);
+  if (allPos.length === 0) return { minX: 60, minY: 60, maxX: 740, maxY: 500 };
+  return {
+    minX: Math.min(...allPos.map(p => p.x)),
+    minY: Math.min(...allPos.map(p => p.y)),
+    maxX: Math.max(...allPos.map(p => p.x)),
+    maxY: Math.max(...allPos.map(p => p.y)),
+  };
+}
+
+// Place new node OUTSIDE the current network, extending outward from anchor
+function pickNewPos(anchorId) {
+  const anchor = getPos(anchorId);
+  const center = getNetworkCenter();
+  const bbox = getNetworkBBox();
+
+  // Direction: from center through anchor, then extend outward
+  let dx = anchor.x - center.x;
+  let dy = anchor.y - center.y;
+  const mag = Math.sqrt(dx*dx + dy*dy) || 1;
+  dx /= mag; dy /= mag;
+
+  // Add some angular spread so nodes don't stack
+  const spread = (Math.random() - 0.5) * 1.2;
+  const cos = Math.cos(spread), sin = Math.sin(spread);
+  const rdx = dx * cos - dy * sin;
+  const rdy = dx * sin + dy * cos;
+
+  // Place outside the bounding box edge
+  const networkRadius = Math.max(bbox.maxX - bbox.minX, bbox.maxY - bbox.minY) / 2;
+  const dist = networkRadius * 0.5 + 80 + Math.random() * 60;
+
+  const x = anchor.x + rdx * dist;
+  const y = anchor.y + rdy * dist;
+  return { x, y };
+}
+
+// Smoothly update the SVG viewBox to fit all nodes with padding
+function updateViewBox() {
+  const svg = document.getElementById("grid-svg");
+  const allPos = Object.values(knownBuses);
+  if (allPos.length === 0) return;
+
+  const pad = 80;
+  const minX = Math.min(...allPos.map(p => p.x)) - pad;
+  const minY = Math.min(...allPos.map(p => p.y)) - pad;
+  const maxX = Math.max(...allPos.map(p => p.x)) + pad;
+  const maxY = Math.max(...allPos.map(p => p.y)) + pad;
+
+  const targetW = Math.max(800, maxX - minX);
+  const targetH = Math.max(560, maxY - minY);
+  const targetX = Math.min(0, minX);
+  const targetY = Math.min(0, minY);
+
+  // Smooth lerp toward target
+  const lerp = 0.15;
+  currentViewBox.x += (targetX - currentViewBox.x) * lerp;
+  currentViewBox.y += (targetY - currentViewBox.y) * lerp;
+  currentViewBox.w += (targetW - currentViewBox.w) * lerp;
+  currentViewBox.h += (targetH - currentViewBox.h) * lerp;
+
+  svg.setAttribute("viewBox",
+    `${currentViewBox.x.toFixed(1)} ${currentViewBox.y.toFixed(1)} ${currentViewBox.w.toFixed(1)} ${currentViewBox.h.toFixed(1)}`
+  );
+}
+
+// ══════════════════════════════════════════════
+//  Render full grid from data
+// ══════════════════════════════════════════════
+function renderGrid(gridData) {
+  if (!gridData || !gridData.buses) return;
+  const linesG = document.getElementById("g-lines");
+  const busesG = document.getElementById("g-buses");
+  const ringsG = document.getElementById("g-rings");
+
+  const buses = gridData.buses || [];
+  const lines = gridData.lines || [];
+
+  // Register buses
+  buses.forEach(b => {
+    if (!knownBuses[b.bus_id]) {
+      const pos = BASE_POSITIONS[b.bus_id] || pickNewPos(b.bus_id);
+      knownBuses[b.bus_id] = { ...pos, isNew: !BASE_POSITIONS[b.bus_id] };
+    }
+  });
+
+  // Register lines — detect new ones from active_events
+  const events = gridData.active_events || [];
+  events.forEach(ev => {
+    if (ev.kind === "node_added" && ev.anchor && ev.target) {
+      // Make sure new node has a position near its anchor
+      if (!knownBuses[ev.target]) {
+        knownBuses[ev.target] = { ...pickNewPos(ev.anchor), isNew: true };
+      }
+    }
+  });
+
+  lines.forEach(l => {
+    if (!knownLines[l.line_id]) {
+      knownLines[l.line_id] = { fromId: l.from_bus, toId: l.to_bus, isNew: false };
+    }
+  });
+
+  // Check for newly added lines from events
+  events.forEach(ev => {
+    if (ev.kind === "link_added" && ev.target) {
+      if (knownLines[ev.target] && !knownLines[ev.target]._seen) {
+        knownLines[ev.target].isNew = true;
+        knownLines[ev.target]._seen = true;
+      }
+    }
+  });
+
+  // Clear and redraw
+  linesG.innerHTML = "";
+  busesG.innerHTML = "";
+  ringsG.innerHTML = "";
+
+  // Draw lines
+  lines.forEach(l => {
+    const from = getPos(l.from_bus);
+    const to = getPos(l.to_bus);
+    const pct = l.loading_pct || 0;
+    const isTripped = pct === 0 && l.flow_mw === 0;
+    const info = knownLines[l.line_id] || {};
+
+    let color, width;
+    if (isTripped) { color = "#333"; width = 1.5; }
+    else if (pct > 95) { color = "#ff3333"; width = 4; }
+    else if (pct > 80) { color = "#ffcc00"; width = 3.5; }
+    else if (pct > 50) { color = "var(--green-dim)"; width = 3; }
+    else { color = "#333"; width = 2; }
+
+    // Main line
+    const line = svgEl("line");
+    line.setAttribute("x1", from.x); line.setAttribute("y1", from.y);
+    line.setAttribute("x2", to.x);   line.setAttribute("y2", to.y);
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", width);
+    line.setAttribute("class", "power-line" + (isTripped ? " line-tripped" : "") + (info.isNew ? " link-new" : ""));
+    line.setAttribute("id", "line-" + l.line_id);
+    linesG.appendChild(line);
+
+    // Flow dash overlay
+    if (!isTripped && pct > 20) {
+      const dash = svgEl("line");
+      dash.setAttribute("x1", from.x); dash.setAttribute("y1", from.y);
+      dash.setAttribute("x2", to.x);   dash.setAttribute("y2", to.y);
+      dash.setAttribute("stroke", color);
+      dash.setAttribute("stroke-width", "1.5");
+      dash.setAttribute("class", "flow-dash");
+      linesG.appendChild(dash);
+    }
+
+    // Label at midpoint
+    const mx = (from.x + to.x) / 2;
+    const my = (from.y + to.y) / 2;
+    const label = svgEl("text");
+    label.setAttribute("x", mx); label.setAttribute("y", my - 6);
+    label.setAttribute("class", "line-label");
+    label.textContent = `${l.line_id}  ${pct.toFixed(0)}%`;
+    if (pct > 80) label.setAttribute("fill", color);
+    linesG.appendChild(label);
+  });
+
+  // Draw buses
+  buses.forEach(b => {
+    const pos = getPos(b.bus_id);
+    const isNew = knownBuses[b.bus_id]?.isNew || false;
+    const v = b.voltage_pu || 1.0;
+    const g = svgEl("g");
+    if (isNew) g.setAttribute("class", "node-new");
+
+    // Circle
+    const circle = svgEl("circle");
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", "22");
+    circle.setAttribute("class", "bus-circle");
+    circle.setAttribute("fill", "var(--bg3)");
+
+    let sColor, sFilter;
+    if (v < 0.95 || v > 1.05) { sColor = "var(--red)"; sFilter = "url(#glow-r)"; }
+    else if (v < 0.97 || v > 1.03) { sColor = "var(--yellow)"; sFilter = "url(#glow-y)"; }
+    else { sColor = "var(--green)"; sFilter = "url(#glow-g)"; }
+    circle.setAttribute("stroke", sColor);
+    circle.setAttribute("filter", sFilter);
+    g.appendChild(circle);
+
+    // Voltage inside
+    const vt = svgEl("text");
+    vt.setAttribute("x", pos.x); vt.setAttribute("y", pos.y + 4);
+    vt.setAttribute("class", "bus-label");
+    vt.setAttribute("fill", sColor);
+    vt.textContent = v.toFixed(2);
+    g.appendChild(vt);
+
+    // Name below
+    const nm = svgEl("text");
+    nm.setAttribute("x", pos.x); nm.setAttribute("y", pos.y + 38);
+    nm.setAttribute("class", "bus-sub");
+    nm.setAttribute("style", "font-weight:600; font-size:10px");
+    nm.textContent = b.bus_id;
+    g.appendChild(nm);
+
+    // MW reading
+    const load = b.load_mw || 0;
+    const gen = b.generation_mw || 0;
+    const mw = svgEl("text");
+    mw.setAttribute("x", pos.x); mw.setAttribute("y", pos.y + 50);
+    mw.setAttribute("class", "bus-sub");
+    if (gen > 0 && load > 0) mw.textContent = `${load.toFixed(0)}L / ${gen.toFixed(0)}G`;
+    else if (gen > 0) mw.textContent = `${gen.toFixed(0)} MW`;
+    else mw.textContent = `${load.toFixed(0)} MW`;
+    g.appendChild(mw);
+
+    busesG.appendChild(g);
+
+    // Action highlight ring
+    const ring = svgEl("circle");
+    ring.setAttribute("cx", pos.x);
+    ring.setAttribute("cy", pos.y);
+    ring.setAttribute("r", "24");
+    ring.setAttribute("class", "action-ring");
+    ring.setAttribute("id", "ring-" + b.bus_id);
+    ring.setAttribute("stroke", "var(--green)");
+    ringsG.appendChild(ring);
+  });
+
+  // Zoom the viewBox to fit all nodes
+  updateViewBox();
+}
+
+// ══════════════════════════════════════════════
+//  Highlight action targets on grid
+// ══════════════════════════════════════════════
+function highlightActions(actions) {
+  // Clear all rings
+  document.querySelectorAll(".action-ring.active").forEach(el => el.classList.remove("active"));
+
+  if (!actions) return;
+  actions.forEach(a => {
+    const target = a.target || "";
+    const type = (a.type || "").toUpperCase();
+    if (type === "TOPOLOGY") {
+      const el = document.getElementById("line-" + target);
+      if (el) {
+        el.setAttribute("stroke", "var(--cyan)");
+        el.setAttribute("stroke-dasharray", "8 4");
+        setTimeout(() => el.removeAttribute("stroke-dasharray"), 3000);
+      }
+    } else {
+      const ring = document.getElementById("ring-" + target);
+      if (ring) {
+        const colors = { REDISPATCH: "var(--orange)", STORAGE: "var(--green)", LOAD_SHAPE: "var(--cyan)" };
+        ring.setAttribute("stroke", colors[type] || "var(--green)");
+        ring.classList.add("active");
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+//  Chat rendering
+// ══════════════════════════════════════════════
+function renderChat(chatLog) {
+  if (!chatLog || chatLog.length === 0) return;
+  const body = document.getElementById("chat-body");
+
+  // Only append new messages
+  const newMsgs = chatLog.slice(lastChatLen);
+  lastChatLen = chatLog.length;
+
+  newMsgs.forEach(msg => {
+    const div = document.createElement("div");
+
+    if (msg.role === "system") {
+      div.className = "chat-msg system";
+      const kindLabel = (msg.kind || "EVENT").replace("_", " ");
+      div.innerHTML = `<div class="msg-header">System &middot; ${kindLabel}</div>${escHtml(msg.text)}`;
+    }
+    else if (msg.role === "thinking") {
+      div.className = "chat-msg thinking";
+      const risk = msg.risk || "low";
+      div.innerHTML = `<div class="msg-header">Agent Analysis</div><span class="risk-badge risk-${risk}">${risk.toUpperCase()}</span> ${escHtml(msg.text)}`;
+    }
+    else if (msg.role === "action") {
+      div.className = "chat-msg action";
+      const actions = msg.actions || [];
+      if (actions.length === 0) {
+        div.innerHTML = `<div class="msg-header">Agent Actions</div>${escHtml(msg.text)}`;
+      } else {
+        let html = `<div class="msg-header">Agent Actions (${actions.length})</div>`;
+        actions.forEach(a => {
+          const type = (a.type || "").toUpperCase();
+          html += `<div class="action-line">
+            <span class="action-badge badge-${type}">${type}</span>
+            <span class="action-text"><strong>${a.target || ""}</strong> &mdash; ${escHtml(a.reason || "")}</span>
+          </div>`;
+        });
+        div.innerHTML = html;
+      }
+    }
+
+    body.appendChild(div);
+  });
+
+  // Auto-scroll to bottom
+  body.scrollTop = body.scrollHeight;
+}
+
+function escHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s || "";
+  return d.innerHTML;
+}
+
+// ══════════════════════════════════════════════
+//  WebSocket
+// ══════════════════════════════════════════════
+function connect() {
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+  ws.onopen = () => {
+    document.getElementById("ws-dot").classList.add("on");
+  };
+
+  ws.onmessage = (ev) => {
+    try {
+      const data = JSON.parse(ev.data);
+
+      // Header
+      document.getElementById("pill-cycle").textContent = `Cycle ${data.cycle || 0}`;
+      document.getElementById("pill-ep").textContent = `Ep ${data.episode || 1}`;
+
+      // Grid
+      renderGrid(data.grid);
+
+      // Highlight latest actions
+      if (data.agent && data.agent.latest_actions) {
+        highlightActions(data.agent.latest_actions);
+      }
+
+      // Chat
+      renderChat(data.chat);
+
+    } catch(e) { console.error("WS parse error:", e); }
+  };
+
+  ws.onclose = () => {
+    document.getElementById("ws-dot").classList.remove("on");
+    setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ══════════════════════════════════════════════
+//  Init
+// ══════════════════════════════════════════════
+connect();
+setInterval(() => { if (ws && ws.readyState === 1) ws.send("ping"); }, 30000);
+</script>
+</body>
+</html>

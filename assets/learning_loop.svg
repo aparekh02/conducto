@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" width="1100" height="500">
+  <defs>
+    <linearGradient id="nvG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#76b900"/>
+      <stop offset="100%" style="stop-color:#5a8f00"/>
+    </linearGradient>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <marker id="aG" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#76b900"/>
+    </marker>
+    <marker id="aO" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ff9900"/>
+    </marker>
+    <marker id="aC" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#00ccff"/>
+    </marker>
+    <marker id="aR" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ff3366"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="500" rx="12" fill="#0a0a0a"/>
+  <rect width="1100" height="3" fill="url(#nvG)"/>
+
+  <text x="550" y="38" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="#fff">Continuous Learning Loop</text>
+  <text x="550" y="55" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#76b900" letter-spacing="2">OBSERVE → DECIDE → ACT → LEARN → REPEAT</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Step 1: OBSERVE -->
+  <!-- ═══════════════════════════════════════ -->
+  <g transform="translate(50, 90)" filter="url(#sh)">
+    <rect width="200" height="140" rx="10" fill="#111" stroke="#76b900" stroke-width="1.5"/>
+    <rect width="200" height="3" rx="1.5" fill="#76b900"/>
+    <circle cx="30" cy="35" r="14" fill="#76b900" opacity="0.15"/>
+    <text x="30" y="40" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#76b900">1</text>
+    <text x="55" y="40" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">OBSERVE</text>
+
+    <text x="20" y="65" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">GridEnv steps the simulator</text>
+    <text x="20" y="80" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">DC power flow solves voltages</text>
+    <text x="20" y="95" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Weather drives renewables</text>
+    <text x="20" y="110" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Disturbances inject faults</text>
+    <text x="20" y="125" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#76b900">→ GridState snapshot</text>
+  </g>
+
+  <!-- Step 2: DECIDE -->
+  <g transform="translate(300, 90)" filter="url(#sh)">
+    <rect width="200" height="140" rx="10" fill="#111" stroke="#00ccff" stroke-width="1.5"/>
+    <rect width="200" height="3" rx="1.5" fill="#00ccff"/>
+    <circle cx="30" cy="35" r="14" fill="#00ccff" opacity="0.15"/>
+    <text x="30" y="40" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#00ccff">2</text>
+    <text x="55" y="40" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">DECIDE</text>
+
+    <text x="20" y="65" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">State → Nemotron context</text>
+    <text x="20" y="80" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">RAG retrieves grid knowledge</text>
+    <text x="20" y="95" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Prior rewards guide strategy</text>
+    <text x="20" y="110" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">LLM outputs structured JSON</text>
+    <text x="20" y="125" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#00ccff">→ AgentDecision</text>
+  </g>
+
+  <!-- Step 3: ACT -->
+  <g transform="translate(550, 90)" filter="url(#sh)">
+    <rect width="200" height="140" rx="10" fill="#111" stroke="#ff9900" stroke-width="1.5"/>
+    <rect width="200" height="3" rx="1.5" fill="#ff9900"/>
+    <circle cx="30" cy="35" r="14" fill="#ff9900" opacity="0.15"/>
+    <text x="30" y="40" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#ff9900">3</text>
+    <text x="55" y="40" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">ACT</text>
+
+    <text x="20" y="65" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">REDISPATCH generators</text>
+    <text x="20" y="80" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">STORAGE charge/discharge</text>
+    <text x="20" y="95" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">LOAD_SHAPE flexible demand</text>
+    <text x="20" y="110" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">TOPOLOGY open/close lines</text>
+    <text x="20" y="125" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#ff9900">→ Grid state changes</text>
+  </g>
+
+  <!-- Step 4: EVALUATE -->
+  <g transform="translate(800, 90)" filter="url(#sh)">
+    <rect width="250" height="140" rx="10" fill="#111" stroke="#ff3366" stroke-width="1.5"/>
+    <rect width="250" height="3" rx="1.5" fill="#ff3366"/>
+    <circle cx="30" cy="35" r="14" fill="#ff3366" opacity="0.15"/>
+    <text x="30" y="40" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#ff3366">4</text>
+    <text x="55" y="40" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#fff">EVALUATE + LEARN</text>
+
+    <text x="20" y="65" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Multi-objective reward computed</text>
+    <text x="20" y="80" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Trace recorded to JSONL buffer</text>
+    <text x="20" y="95" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">Every N cycles: send to A100</text>
+    <text x="20" y="110" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#888">QLoRA gradient update on LoRA</text>
+    <text x="20" y="125" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#ff3366">→ Model improves in-place</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- FLOW ARROWS (top row) -->
+  <!-- ═══════════════════════════════════════ -->
+  <line x1="255" y1="160" x2="293" y2="160" stroke="#76b900" stroke-width="2" marker-end="url(#aG)"/>
+  <line x1="505" y1="160" x2="543" y2="160" stroke="#00ccff" stroke-width="2" marker-end="url(#aC)"/>
+  <line x1="755" y1="160" x2="793" y2="160" stroke="#ff9900" stroke-width="2" marker-end="url(#aO)"/>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- FEEDBACK LOOP (bottom arc) -->
+  <!-- ═══════════════════════════════════════ -->
+  <path d="M 925 235 Q 925 400 550 400 Q 150 400 150 235" fill="none" stroke="#ff3366" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#aR)" opacity="0.6"/>
+  <text x="550" y="380" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" fill="#ff3366" opacity="0.7">Updated model feeds back into next decision cycle</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Bottom: Reward breakdown -->
+  <!-- ═══════════════════════════════════════ -->
+  <g transform="translate(50, 425)">
+    <text x="0" y="0" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="600" fill="#555" letter-spacing="1">REWARD SIGNAL COMPONENTS:</text>
+
+    <rect x="220" y="-12" width="90" height="20" rx="10" fill="#ff3333" opacity="0.15" stroke="#ff3333" stroke-width="0.5"/>
+    <text x="265" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#ff3333">Congestion</text>
+
+    <rect x="320" y="-12" width="70" height="20" rx="10" fill="#ffcc00" opacity="0.15" stroke="#ffcc00" stroke-width="0.5"/>
+    <text x="355" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#ffcc00">Voltage</text>
+
+    <rect x="400" y="-12" width="90" height="20" rx="10" fill="#ff9900" opacity="0.15" stroke="#ff9900" stroke-width="0.5"/>
+    <text x="445" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#ff9900">Curtailment</text>
+
+    <rect x="500" y="-12" width="70" height="20" rx="10" fill="#00ccff" opacity="0.15" stroke="#00ccff" stroke-width="0.5"/>
+    <text x="535" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#00ccff">Cost</text>
+
+    <rect x="580" y="-12" width="80" height="20" rx="10" fill="#cc66ff" opacity="0.15" stroke="#cc66ff" stroke-width="0.5"/>
+    <text x="620" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#cc66ff">Emissions</text>
+
+    <rect x="670" y="-12" width="80" height="20" rx="10" fill="#76b900" opacity="0.15" stroke="#76b900" stroke-width="0.5"/>
+    <text x="710" y="3" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#76b900">Reliability</text>
+  </g>
+
+  <!-- Bottom tagline -->
+  <text x="550" y="475" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#333" letter-spacing="1">5-minute decision intervals  |  24-hour episodes  |  6-bus and IEEE 14-bus scenarios</text>
+</svg>

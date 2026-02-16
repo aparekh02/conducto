@@ -1,0 +1,14 @@
+# Everything here runs ON the VESSL A100, not locally.
+# The base container image is nvcr.io/nvidia/tensorrt-llm:0.17.0
+# which includes tensorrt-llm, torch, and CUDA runtime.
+
+# Already in the TRT-LLM container:
+#   tensorrt-llm
+#   torch
+#   numpy
+
+# Additional deps installed at runtime:
+transformers>=4.40
+peft>=0.11
+fastapi>=0.111
+uvicorn>=0.30

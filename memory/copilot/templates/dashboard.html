@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conducto Grid Co-Pilot</title>
+<style>
+  :root { --bg: #0a0e17; --surface: #131a2b; --border: #1e2a42; --text: #e0e6f0; --accent: #3b82f6; --green: #22c55e; --red: #ef4444; --yellow: #eab308; --dim: #64748b; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px; }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 18px; color: var(--accent); }
+  .stats { display: flex; gap: 24px; color: var(--dim); font-size: 12px; }
+  .stats .stat { text-align: center; }
+  .stats .stat-value { font-size: 20px; color: var(--text); font-weight: bold; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .decision-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .decision-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .risk-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+  .risk-low { background: #22c55e22; color: var(--green); }
+  .risk-medium { background: #eab30822; color: var(--yellow); }
+  .risk-high { background: #ef444422; color: var(--red); }
+  .risk-critical { background: #ef4444; color: white; }
+  .assessment { color: var(--dim); margin-bottom: 16px; line-height: 1.5; }
+  .actions-list { margin-bottom: 16px; }
+  .action-item { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .action-type { color: var(--accent); font-weight: bold; }
+  .action-reason { color: var(--dim); font-size: 12px; }
+  .feedback-buttons { display: flex; gap: 8px; }
+  .btn { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: bold; }
+  .btn-approve { background: var(--green); color: white; }
+  .btn-reject { background: var(--red); color: white; }
+  .btn-approve:hover { opacity: 0.85; }
+  .btn-reject:hover { opacity: 0.85; }
+  .meta { color: var(--dim); font-size: 11px; }
+  .empty { text-align: center; padding: 60px; color: var(--dim); }
+  #feedbackStats { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Conducto Grid Co-Pilot</h1>
+  <div class="stats" id="statsBar">
+    <div class="stat"><div class="stat-value" id="statTotal">-</div>decisions</div>
+    <div class="stat"><div class="stat-value" id="statApproved">-</div>approved</div>
+    <div class="stat"><div class="stat-value" id="statRejected">-</div>rejected</div>
+    <div class="stat"><div class="stat-value" id="statRate">-</div>approval %</div>
+  </div>
+</div>
+<div class="container">
+  <div id="decisions"></div>
+</div>
+<script>
+async function loadDecisions() {
+  const res = await fetch('/api/decisions?limit=20');
+  const data = await res.json();
+  const el = document.getElementById('decisions');
+  if (!data.decisions.length) {
+    el.innerHTML = '<div class="empty">No pending decisions. The agent will push recommendations here.</div>';
+    return;
+  }
+  el.innerHTML = data.decisions.reverse().map(d => `
+    <div class="decision-card" id="card-${d.trace_id}">
+      <div class="decision-header">
+        <span class="risk-badge risk-${d.risk_level}">${d.risk_level}</span>
+        <span class="meta">${new Date(d.timestamp * 1000).toLocaleTimeString()} &middot; ${d.latency_ms.toFixed(0)}ms &middot; ${d.trace_id}</span>
+      </div>
+      <div class="assessment">${d.assessment}</div>
+      <div class="actions-list">
+        ${d.actions.map(a => `
+          <div class="action-item">
+            <div><span class="action-type">${a.type}</span> → ${a.target} ${JSON.stringify(a.params || {})}</div>
+            <div class="action-reason">${a.reason || ''}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="feedback-buttons">
+        <button class="btn btn-approve" onclick="sendFeedback('${d.trace_id}', 'approve')">Approve</button>
+        <button class="btn btn-reject" onclick="sendFeedback('${d.trace_id}', 'reject')">Reject</button>
+      </div>
+    </div>
+  `).join('');
+}
+async function sendFeedback(traceId, action) {
+  await fetch('/api/feedback', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({trace_id: traceId, operator_id: 'operator-1', action}),
+  });
+  const card = document.getElementById('card-' + traceId);
+  if (card) card.style.borderColor = action === 'approve' ? 'var(--green)' : 'var(--red)';
+  loadStats();
+}
+async function loadStats() {
+  const res = await fetch('/api/feedback/stats');
+  const s = await res.json();
+  document.getElementById('statTotal').textContent = s.total;
+  document.getElementById('statApproved').textContent = s.approved;
+  document.getElementById('statRejected').textContent = s.rejected;
+  document.getElementById('statRate').textContent = (s.approval_rate * 100).toFixed(0) + '%';
+}
+loadDecisions();
+loadStats();
+setInterval(loadDecisions, 5000);
+setInterval(loadStats, 10000);
+</script>
+</body>
+</html>

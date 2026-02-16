@@ -1,0 +1,8 @@
+# RAG vector store
+faiss-cpu>=1.7
+requests>=2.31
+numpy>=1.24
+
+# Operator co-pilot UI
+fastapi>=0.111
+uvicorn>=0.30
